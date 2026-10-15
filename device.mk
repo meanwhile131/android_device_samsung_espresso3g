@@ -14,18 +14,6 @@
 # limitations under the License.
 #
 
-# define the prebuilt kernel
-ifeq ($(TARGET_PREBUILT_KERNEL),)
-  LOCAL_KERNEL := device/samsung/espresso3g-kernel/zImage
-else
-  LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
-endif
-
-# we defined the kernel, now let's put in PRODUCT_COPY_FILES
-PRODUCT_COPY_FILES += \
-    $(LOCAL_KERNEL):kernel
-
-
 # Include espresso-common makefile
 $(call inherit-product, device/samsung/espressowifi/device-common.mk)
 
