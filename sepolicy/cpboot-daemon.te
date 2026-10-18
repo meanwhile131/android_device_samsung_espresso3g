@@ -1,7 +1,3 @@
-userdebug_or_eng(`
-  permissive cpboot-daemon;
-')
-
 allow cpboot-daemon cgroup:dir create_dir_perms;
 allow cpboot-daemon cgroup:file r_file_perms;
 allow cpboot-daemon device:dir w_dir_perms;
@@ -9,8 +5,27 @@ allow cpboot-daemon efs_block_device:blk_file r_file_perms;
 allow cpboot-daemon efs_file:file rw_file_perms;
 allow cpboot-daemon proc:file r_file_perms;
 allow cpboot-daemon radio_device:blk_file r_file_perms;
+allow cpboot-daemon radio_device:chr_file rw_file_perms;
 allow cpboot-daemon self:capability setuid;
 allow cpboot-daemon { block_device efs_file }:dir search;
+
+# cbd (optionally) creates its message channel /dev/__cbd_msg_ via mknod at
+# runtime.  The mknod capability is blanket-neverallowed for all domains except
+# init/ueventd/vold/recovery (public/domain.te), so the node cannot be created
+# by cbd under SELinux.  cbd boots the modem fine without the node
+# (ril.cbd.boot_done=1), so we silence the denials instead.  If modem messaging
+# ever needs the node, pre-create it from init with the proper major/minor and
+# file_contexts label /dev/__cbd_msg_ -> cbd_device, and grant
+#   allow cpboot-daemon cbd_device:chr_file { open read write };
+# (the type_transition below already labels a cbd-created node cbd_device).
+dontaudit cpboot-daemon self:global_capability_class_set mknod;
+dontaudit cpboot-daemon cbd_device:chr_file create;
+allow cpboot-daemon cbd_device:chr_file { open read write unlink };
+type_transition cpboot-daemon device:chr_file cbd_device;
+allow cpboot-daemon device:dir { remove_name };
+
+# cbd reads /proc/cmdline
+allow cpboot-daemon proc_cmdline:file r_file_perms;
 
 # Talk to init over the property socket
 set_prop(cpboot-daemon, radio_prop)
