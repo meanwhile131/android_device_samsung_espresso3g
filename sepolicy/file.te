@@ -1,2 +1,4 @@
 type cbd_device, dev_type;
-type radio_data, file_type;
+# /data/misc/radio lives on /data, so it must carry the data attributes
+# (enforced by sepolicy_tests in a full build)
+type radio_data, file_type, data_file_type, core_data_file_type;
