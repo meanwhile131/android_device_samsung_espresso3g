@@ -1,2 +1,2 @@
 type cbd_device, dev_type;
-type radio_data, file_type;
+type radio_data, file_type, data_file_type, core_data_file_type;
